@@ -1,0 +1,161 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Window = Rayfield:CreateWindow({
+   Name = "UniRivals",
+   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   LoadingTitle = "idk",
+   LoadingSubtitle = "by RandomGuylol86",
+   Theme = "Bloom", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Big Hub"
+   },
+
+   Discord = {
+      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+
+   KeySystem = false, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Untitled",
+      Subtitle = "Key System",
+      Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
+      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+
+local dhlock = loadstring(game:HttpGet("https://raw.githubusercontent.com/Stratxgy/DH-Lua-Lock/refs/heads/main/Main.lua"))()
+
+-- Aimbot Tab
+local aimbotTab = Window:CreateTab("aimbot", "crosshair") -- Title, Image
+
+local Section = aimbotTab:CreateSection("Aimbot Settings")
+
+local Toggle = aimbotTab:CreateToggle({
+   Name = "Aimbot (right mouse to enable)",
+   CurrentValue = false,
+   Flag = "Toggle1",
+   Callback = function(Value)
+      getgenv().dhlock.enabled = Value and "enabled" or "disabled"
+   end,
+})
+
+local Toggle = aimbotTab:CreateToggle({
+   Name = "Fov",
+   CurrentValue = false,
+   Flag = "Toggle1",
+   Callback = function(Value)
+      getgenv().dhlock.showfov = Value
+   end,
+})
+
+local Slider = aimbotTab:CreateSlider({
+   Name = "Aimbot FOV",
+   Range = {0, 500},
+   Increment = 10,
+   Suffix = "FOV",
+   CurrentValue = 50,
+   Flag = "Slider1",
+   Callback = function(Value)
+      getgenv().dhlock.fov = Value
+   end,
+})
+
+local Keybind = aimbotTab:CreateKeybind({
+   Name = "AimKey(soon)",
+   CurrentKeybind = "MB2",
+   HoldToInteract = false,
+   Flag = "Keybind1",
+   Callback = function(Keybind)
+      getgenv().dhlock.keybind = Keybind
+   end,
+})
+
+-- Visuals Tab
+local visualsTab = Window:CreateTab("Visuals", "eye") -- Title, Image
+
+-- Create a section within the "Visuals" tab for ESP settings
+local visualsSection = visualsTab:CreateSection("ESP Settings")
+
+-- Toggle for enabling/disabling ESP (Highlight all players)
+local espToggle = visualsTab:CreateToggle({
+    Name = "ESP (Highlight all players)",
+    CurrentValue = false,
+    Flag = "espToggle",
+    Callback = function(Value)
+        getgenv().espEnabled = Value  -- Toggle the ESP state
+        if Value then
+            -- Enable ESP: Highlight all players
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Parent = player.Character
+                    highlight.FillColor = Color3.fromRGB(255, 255, 255)  -- Set highlight color to white
+                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)  -- Set outline color to white
+                    highlight.FillTransparency = 0.5  -- Set fill transparency
+                    highlight.OutlineTransparency = 0.5  -- Set outline transparency
+                end
+            end
+        else
+            -- Disable ESP: Remove all highlights
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local highlight = player.Character:FindFirstChildOfClass("Highlight")
+                    if highlight then
+                        highlight:Destroy()  -- Remove highlight
+                    end
+                end
+            end
+        end
+    end,
+})
+
+-- Toggle for displaying player names above heads
+local espNameToggle = visualsTab:CreateToggle({
+    Name = "ESP Name (Display player names)",
+    CurrentValue = false,
+    Flag = "espNameToggle",
+    Callback = function(Value)
+        getgenv().espNameEnabled = Value  -- Toggle the ESP name state
+        if Value then
+            -- Enable ESP Name: Display player names above their heads
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player.Character and player.Character:FindFirstChild("Head") then
+                    local nameTag = Instance.new("BillboardGui")
+                    nameTag.Parent = player.Character.Head
+                    nameTag.Adornee = player.Character.Head
+                    nameTag.Size = UDim2.new(0, 100, 0, 50)  -- Size of the name tag
+                    nameTag.StudsOffset = Vector3.new(0, 2, 0)  -- Position above the head
+
+                    local label = Instance.new("TextLabel")
+                    label.Parent = nameTag
+                    label.Size = UDim2.new(1, 0, 1, 0)
+                    label.BackgroundTransparency = 1
+                    label.Text = player.Name  -- Player's name
+                    label.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White color
+                    label.TextStrokeTransparency = 0.5  -- Stroke transparency
+                    label.TextSize = 18  -- Text size
+                end
+            end
+        else
+            -- Disable ESP Name: Remove name tags
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player.Character and player.Character:FindFirstChild("Head") then
+                    local nameTag = player.Character.Head:FindFirstChildOfClass("BillboardGui")
+                    if nameTag then
+                        nameTag:Destroy()  -- Remove name tag
+                    end
+                end
+            end
+        end
+    end,
+})
